@@ -122,7 +122,11 @@ async function startVisualSelector() {
   }
 
   try {
-    showNotification('Loading page content...', 'info');
+    console.log('🎯 Starting visual selector...');
+    console.log('Target URL:', targetUrl);
+    console.log('Login required:', !!loginConfig);
+
+    showNotification('Loading page content... Please wait 10-30 seconds.', 'info');
 
     const response = await fetch('/api/selector/start', {
       method: 'POST',
@@ -132,32 +136,66 @@ async function startVisualSelector() {
 
     const result = await response.json();
 
+    console.log('✅ Server response:', result);
+
     if (!response.ok) {
       throw new Error(result.error);
     }
 
+    const sessionId = result.sessionId;
+    console.log('Session ID:', sessionId);
+
+    // Set a timeout in case the event never fires
+    const timeout = setTimeout(() => {
+      console.error('❌ Timeout waiting for selector-ready event');
+      showNotification('Timeout loading page. Please check server logs and try again.', 'error');
+    }, 60000); // 60 second timeout
+
     // Wait for selector-ready event
     socket.once('selector-ready', (data) => {
-      if (data.sessionId === result.sessionId) {
+      console.log('📡 Received selector-ready event:', data);
+
+      if (data.sessionId === sessionId) {
+        clearTimeout(timeout);
+
+        console.log('✅ Session ID matches, opening popup...');
+
         // Open selector window
         const selectorUrl = `/embedded-selector.html?session=${data.sessionId}`;
-        selectorWindow = window.open(selectorUrl, 'Visual Selector', 'width=1400,height=900');
+        console.log('Opening URL:', selectorUrl);
 
-        if (!selectorWindow) {
-          showNotification('Please allow pop-ups for this site', 'warning');
+        // Try to open popup
+        selectorWindow = window.open(selectorUrl, 'VisualSelector', 'width=1400,height=900,resizable=yes,scrollbars=yes');
+
+        if (!selectorWindow || selectorWindow.closed || typeof selectorWindow.closed === 'undefined') {
+          console.error('❌ Popup blocked!');
+          clearTimeout(timeout);
+
+          // Fallback: provide a link
+          const message = `Popup was blocked. <a href="${selectorUrl}" target="_blank" style="color: white; text-decoration: underline;">Click here to open Visual Selector in new tab</a>`;
+          showHTMLNotification(message, 'warning');
         } else {
+          console.log('✅ Popup opened successfully');
           showNotification('Visual selector opened! Click on elements to select them.', 'success');
         }
+      } else {
+        console.warn('⚠️ Session ID mismatch:', data.sessionId, 'vs', sessionId);
       }
     });
 
     socket.once('selector-error', (data) => {
-      if (data.sessionId === result.sessionId) {
+      console.error('❌ Selector error event:', data);
+
+      if (data.sessionId === sessionId) {
+        clearTimeout(timeout);
         showNotification(`Error loading page: ${data.message}`, 'error');
       }
     });
 
+    console.log('👂 Listening for selector-ready event...');
+
   } catch (error) {
+    console.error('❌ Visual selector error:', error);
     showNotification(`Failed to start visual selector: ${error.message}`, 'error');
   }
 }
@@ -578,6 +616,36 @@ function showNotification(message, type = 'info') {
     notification.style.animation = 'slideOut 0.3s ease';
     setTimeout(() => notification.remove(), 300);
   }, 5000);
+}
+
+// Show HTML notification (allows links, etc.)
+function showHTMLNotification(htmlMessage, type = 'info') {
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    background: ${type === 'success' ? 'var(--success-color)' :
+                  type === 'error' ? 'var(--danger-color)' :
+                  type === 'warning' ? 'var(--warning-color)' :
+                  'var(--primary-color)'};
+    color: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    z-index: 10000;
+    animation: slideIn 0.3s ease;
+    max-width: 400px;
+  `;
+  notification.innerHTML = htmlMessage;
+
+  document.body.appendChild(notification);
+
+  // Remove after 10 seconds (longer for HTML messages)
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => notification.remove(), 300);
+  }, 10000);
 }
 
 // Add animation styles
