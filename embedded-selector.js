@@ -43,9 +43,12 @@ class EmbeddedSelector {
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Get page HTML, cookies, and URL BEFORE closing browser
-      const html = await this.page.content();
+      let html = await this.page.content();
       const cookies = await this.page.cookies();
       const pageUrl = this.page.url(); // Get URL before closing
+
+      // Add base tag to HTML so relative URLs load from original domain
+      html = this.addBaseTag(html, pageUrl);
 
       console.log('✅ Page content retrieved');
       console.log(`   URL: ${pageUrl}`);
@@ -65,6 +68,45 @@ class EmbeddedSelector {
         await this.browser.close();
         console.log('🔒 Browser closed');
       }
+    }
+  }
+
+  /**
+   * Add base tag to HTML so relative URLs work in iframe
+   */
+  addBaseTag(html, pageUrl) {
+    try {
+      // Extract base URL (protocol + domain)
+      const url = new URL(pageUrl);
+      const baseUrl = `${url.protocol}//${url.host}`;
+
+      // Check if base tag already exists
+      if (html.includes('<base')) {
+        // Remove existing base tag
+        html = html.replace(/<base[^>]*>/gi, '');
+      }
+
+      // Add base tag right after <head> or at the start if no head tag
+      if (html.includes('<head>')) {
+        html = html.replace(
+          '<head>',
+          `<head>\n  <base href="${baseUrl}/">`
+        );
+      } else if (html.includes('<head ')) {
+        html = html.replace(
+          /<head([^>]*)>/i,
+          `<head$1>\n  <base href="${baseUrl}/">`
+        );
+      } else {
+        // No head tag, add at the beginning
+        html = `<base href="${baseUrl}/">\n${html}`;
+      }
+
+      console.log(`   Added base tag: ${baseUrl}/`);
+      return html;
+    } catch (error) {
+      console.warn('⚠️  Could not add base tag:', error.message);
+      return html;
     }
   }
 
