@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Output files
+output/
+*.json
+*.xlsx
+*.csv
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Puppeteer
+.local-chromium/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Screenshots (if you add screenshot functionality)
+screenshots/
