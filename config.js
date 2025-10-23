@@ -44,6 +44,23 @@ module.exports = {
   // Delay between button clicks (milliseconds)
   clickDelay: 500,
 
+  // Detail view settings - Click on cards to open detail modal/page
+  // Enable this if website URLs are only visible after clicking on a company card
+  detailView: {
+    enabled: false, // Set to true to enable clicking on cards
+    clickSelector: null, // Optional: specific element to click within card (e.g., '.details-btn'). If null, clicks the entire card
+    websiteSelector: null, // Selector for website link in the detail view (e.g., 'a.company-website', '.detail-link')
+    closeSelector: null, // Optional: selector to close the detail view (e.g., '.close-btn', '.modal-close'). If null, uses Escape key
+    waitAfterClick: 1000, // Wait time after clicking to open detail (milliseconds)
+  },
+
+  // Download logo images locally (optional)
+  downloadLogos: {
+    enabled: false, // Set to true to download actual logo images
+    // Images will be saved to ./output/logos/ directory
+    // Filenames format: {id}_{company_name}.{ext}
+  },
+
   // CSS Selectors for data extraction
   // IMPORTANT: Customize these selectors based on your target website
   selectors: {

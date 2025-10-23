@@ -391,6 +391,39 @@
             </div>
             <div class="selection-item-selector" id="selector-loadMoreButton">Not selected</div>
           </div>
+
+          <div class="selection-item" data-type="detailViewClickTarget">
+            <div class="selection-item-header">
+              <span class="selection-item-label">9. Detail Click Target (Optional)</span>
+              <button class="select-btn" onclick="startSelection('detailViewClickTarget')">Select</button>
+            </div>
+            <div class="selection-item-selector" id="selector-detailViewClickTarget">Not selected</div>
+            <small style="color: #6b7280; font-size: 0.85rem; display: block; margin-top: 0.25rem;">
+              Element to click to open detail view
+            </small>
+          </div>
+
+          <div class="selection-item" data-type="detailViewWebsite">
+            <div class="selection-item-header">
+              <span class="selection-item-label">10. Website in Detail View (Optional)</span>
+              <button class="select-btn" onclick="startSelection('detailViewWebsite')">Select</button>
+            </div>
+            <div class="selection-item-selector" id="selector-detailViewWebsite">Not selected</div>
+            <small style="color: #6b7280; font-size: 0.85rem; display: block; margin-top: 0.25rem;">
+              Select website link from opened detail view
+            </small>
+          </div>
+
+          <div class="selection-item" data-type="detailViewClose">
+            <div class="selection-item-header">
+              <span class="selection-item-label">11. Close Detail Button (Optional)</span>
+              <button class="select-btn" onclick="startSelection('detailViewClose')">Select</button>
+            </div>
+            <div class="selection-item-selector" id="selector-detailViewClose">Not selected</div>
+            <small style="color: #6b7280; font-size: 0.85rem; display: block; margin-top: 0.25rem;">
+              Button to close detail view (leave empty to use Escape key)
+            </small>
+          </div>
         </div>
       </div>
 

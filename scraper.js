@@ -2,6 +2,8 @@ const puppeteer = require('puppeteer');
 const XLSX = require('xlsx');
 const fs = require('fs').promises;
 const path = require('path');
+const https = require('https');
+const http = require('http');
 const config = require('./config');
 
 /**
@@ -264,11 +266,62 @@ class FairScraper {
   }
 
   /**
+   * Download an image from URL and save it locally
+   */
+  async downloadImage(url, filepath) {
+    return new Promise((resolve, reject) => {
+      const protocol = url.startsWith('https') ? https : http;
+
+      protocol.get(url, (response) => {
+        if (response.statusCode !== 200) {
+          reject(new Error(`Failed to download ${url}: ${response.statusCode}`));
+          return;
+        }
+
+        const fileStream = require('fs').createWriteStream(filepath);
+        response.pipe(fileStream);
+
+        fileStream.on('finish', () => {
+          fileStream.close();
+          resolve(filepath);
+        });
+
+        fileStream.on('error', (err) => {
+          require('fs').unlink(filepath, () => {});
+          reject(err);
+        });
+      }).on('error', reject);
+    });
+  }
+
+  /**
    * Extract participant data from the page
    */
   async extractParticipants(selectors) {
     console.log('📊 Extracting participant data...');
 
+    // Check if we need to click cards to open detail views
+    const needsDetailClick = this.config.detailView && this.config.detailView.enabled;
+
+    if (needsDetailClick) {
+      await this.extractWithDetailView(selectors);
+    } else {
+      await this.extractDirect(selectors);
+    }
+
+    // Download logos if enabled
+    if (this.config.downloadLogos && this.config.downloadLogos.enabled) {
+      await this.downloadAllLogos();
+    }
+
+    console.log(`✅ Extracted ${this.participants.length} participants`);
+    return this.participants;
+  }
+
+  /**
+   * Direct extraction (current method - no clicking needed)
+   */
+  async extractDirect(selectors) {
     const participants = await this.page.evaluate((sel) => {
       const results = [];
 
@@ -318,9 +371,175 @@ class FairScraper {
     }, selectors);
 
     this.participants = participants;
-    console.log(`✅ Extracted ${participants.length} participants`);
+  }
 
-    return participants;
+  /**
+   * Extract with detail view - click on each card to open detail modal/page
+   */
+  async extractWithDetailView(selectors) {
+    console.log('🔍 Extracting data with detail view (clicking on each item)...');
+
+    const containerCount = await this.page.$$eval(selectors.container, els => els.length);
+    console.log(`   Found ${containerCount} items to process`);
+
+    const detailConfig = this.config.detailView;
+    const participants = [];
+
+    for (let i = 0; i < containerCount; i++) {
+      try {
+        console.log(`   Processing item ${i + 1}/${containerCount}...`);
+
+        // Get the container element
+        const containers = await this.page.$$(selectors.container);
+        const container = containers[i];
+
+        if (!container) {
+          console.warn(`   ⚠️  Container ${i + 1} not found, skipping...`);
+          continue;
+        }
+
+        // Scroll into view
+        await container.evaluate(el => el.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        // Extract basic data from the card (name, logo, position, category)
+        const basicData = await container.evaluate((el, sel) => {
+          const logoEl = el.querySelector(sel.logo);
+          const nameEl = el.querySelector(sel.name);
+          const positionEl = el.querySelector(sel.position);
+          const categoryEl = el.querySelector(sel.category);
+
+          return {
+            logo: logoEl ? (logoEl.src || logoEl.getAttribute('data-src') || '') : '',
+            name: nameEl ? nameEl.textContent.trim() : '',
+            position: positionEl ? positionEl.textContent.trim() : '',
+            category: categoryEl ? categoryEl.textContent.trim() : '',
+          };
+        }, selectors);
+
+        // Find and click the detail trigger
+        const clickTarget = detailConfig.clickSelector
+          ? await container.$(detailConfig.clickSelector)
+          : container;
+
+        if (!clickTarget) {
+          console.warn(`   ⚠️  Click target not found for item ${i + 1}, skipping...`);
+          participants.push({
+            id: i + 1,
+            ...basicData,
+            website: '',
+            scrapedAt: new Date().toISOString(),
+          });
+          continue;
+        }
+
+        // Click to open detail view
+        await clickTarget.click();
+        await new Promise(resolve => setTimeout(resolve, detailConfig.waitAfterClick || 1000));
+
+        // Extract website from detail view
+        let website = '';
+        try {
+          if (detailConfig.websiteSelector) {
+            website = await this.page.evaluate((sel) => {
+              const linkEl = document.querySelector(sel);
+              return linkEl ? (linkEl.href || linkEl.getAttribute('data-url') || linkEl.textContent.trim()) : '';
+            }, detailConfig.websiteSelector);
+          }
+        } catch (error) {
+          console.warn(`   ⚠️  Could not extract website from detail view: ${error.message}`);
+        }
+
+        // Close detail view if needed
+        if (detailConfig.closeSelector) {
+          try {
+            await this.page.click(detailConfig.closeSelector);
+            await new Promise(resolve => setTimeout(resolve, 500));
+          } catch (error) {
+            console.warn(`   ⚠️  Could not close detail view: ${error.message}`);
+            // Try pressing Escape as fallback
+            await this.page.keyboard.press('Escape');
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        }
+
+        // Add participant with website from detail view
+        if (basicData.name) {
+          participants.push({
+            id: i + 1,
+            ...basicData,
+            website,
+            scrapedAt: new Date().toISOString(),
+          });
+        }
+
+      } catch (error) {
+        console.error(`   ❌ Error processing item ${i + 1}:`, error.message);
+      }
+    }
+
+    this.participants = participants;
+  }
+
+  /**
+   * Download all logo images to local directory
+   */
+  async downloadAllLogos() {
+    if (!this.participants || this.participants.length === 0) {
+      console.log('ℹ️  No participants to download logos for');
+      return;
+    }
+
+    console.log('🖼️  Downloading logo images...');
+
+    const logoConfig = this.config.downloadLogos;
+    const outputDir = path.join(this.config.outputDir, 'logos');
+
+    // Create logos directory
+    await fs.mkdir(outputDir, { recursive: true });
+
+    let downloadedCount = 0;
+    let skippedCount = 0;
+
+    for (let i = 0; i < this.participants.length; i++) {
+      const participant = this.participants[i];
+
+      if (!participant.logo) {
+        skippedCount++;
+        continue;
+      }
+
+      try {
+        // Generate safe filename
+        const ext = path.extname(new URL(participant.logo).pathname) || '.jpg';
+        const safeName = participant.name
+          .replace(/[^a-z0-9]/gi, '_')
+          .toLowerCase()
+          .substring(0, 50);
+        const filename = `${participant.id}_${safeName}${ext}`;
+        const filepath = path.join(outputDir, filename);
+
+        // Download image
+        await this.downloadImage(participant.logo, filepath);
+
+        // Update participant with local path
+        participant.logoFile = filename;
+        participant.logoPath = filepath;
+
+        downloadedCount++;
+
+        if (downloadedCount % 10 === 0) {
+          console.log(`   Downloaded ${downloadedCount}/${this.participants.length} logos...`);
+        }
+
+      } catch (error) {
+        console.warn(`   ⚠️  Failed to download logo for "${participant.name}": ${error.message}`);
+        skippedCount++;
+      }
+    }
+
+    console.log(`✅ Downloaded ${downloadedCount} logos (${skippedCount} skipped/failed)`);
+    console.log(`   Saved to: ${outputDir}`);
   }
 
   /**

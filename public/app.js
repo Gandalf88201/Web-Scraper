@@ -239,6 +239,33 @@ window.addEventListener('message', (event) => {
       }
     }
 
+    // Handle Detail View selectors
+    if (selectors.detailViewClickTarget || selectors.detailViewWebsite || selectors.detailViewClose) {
+      // Enable detail view
+      document.getElementById('detailViewEnabled').checked = true;
+
+      if (selectors.detailViewClickTarget) {
+        const field = document.getElementById('detailViewClickSelector');
+        field.value = selectors.detailViewClickTarget;
+        field.style.background = '#f0fdf4';
+        setTimeout(() => { field.style.background = ''; }, 2000);
+      }
+
+      if (selectors.detailViewWebsite) {
+        const field = document.getElementById('detailViewWebsiteSelector');
+        field.value = selectors.detailViewWebsite;
+        field.style.background = '#f0fdf4';
+        setTimeout(() => { field.style.background = ''; }, 2000);
+      }
+
+      if (selectors.detailViewClose) {
+        const field = document.getElementById('detailViewCloseSelector');
+        field.value = selectors.detailViewClose;
+        field.style.background = '#f0fdf4';
+        setTimeout(() => { field.style.background = ''; }, 2000);
+      }
+    }
+
     showNotification('✅ Selectors applied! Ready to scrape.', 'success');
 
     // Close selector window if still open
@@ -363,6 +390,18 @@ function getFormConfig() {
       buttonToClick: document.getElementById('selectorButtonToClick').value || null,
     },
 
+    detailView: {
+      enabled: document.getElementById('detailViewEnabled').checked,
+      clickSelector: document.getElementById('detailViewClickSelector').value || null,
+      websiteSelector: document.getElementById('detailViewWebsiteSelector').value || null,
+      closeSelector: document.getElementById('detailViewCloseSelector').value || null,
+      waitAfterClick: parseInt(document.getElementById('detailViewWaitAfterClick').value) || 1500,
+    },
+
+    downloadLogos: {
+      enabled: document.getElementById('downloadLogosEnabled').checked,
+    },
+
     exportJSON: document.getElementById('exportJSON').checked,
     exportExcel: document.getElementById('exportExcel').checked,
     outputDir: './output',
@@ -441,6 +480,20 @@ function setFormConfig(config) {
     document.getElementById('selectorPosition').value = config.selectors.position || '';
     document.getElementById('selectorCategory').value = config.selectors.category || '';
     document.getElementById('selectorButtonToClick').value = config.selectors.buttonToClick || '';
+  }
+
+  // Detail View
+  if (config.detailView) {
+    document.getElementById('detailViewEnabled').checked = config.detailView.enabled || false;
+    document.getElementById('detailViewClickSelector').value = config.detailView.clickSelector || '';
+    document.getElementById('detailViewWebsiteSelector').value = config.detailView.websiteSelector || '';
+    document.getElementById('detailViewCloseSelector').value = config.detailView.closeSelector || '';
+    document.getElementById('detailViewWaitAfterClick').value = config.detailView.waitAfterClick || 1500;
+  }
+
+  // Download Logos
+  if (config.downloadLogos) {
+    document.getElementById('downloadLogosEnabled').checked = config.downloadLogos.enabled || false;
   }
 
   // Export
