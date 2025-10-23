@@ -1,0 +1,24 @@
+{
+  "name": "fair-participants-scraper",
+  "version": "1.0.0",
+  "description": "Web scraper for extracting fair participant data with autoscrolling and dynamic content support",
+  "main": "scraper.js",
+  "scripts": {
+    "start": "node scraper.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "web-scraper",
+    "puppeteer",
+    "fair",
+    "participants",
+    "data-extraction"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "^21.5.2",
+    "xlsx": "^0.18.5",
+    "p-limit": "^3.1.0"
+  }
+}
