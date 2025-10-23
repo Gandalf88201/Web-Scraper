@@ -1,10 +1,10 @@
-# Fair Participants Web Scraper
+# General Purpose Web Scraper
 
-A comprehensive Node.js web scraper designed to extract participant data from fair and exhibition websites with support for login authentication, dynamic content loading, "Load More" buttons, auto-scrolling, and a Chrome extension-style visual selector interface.
+A comprehensive Node.js web scraper designed to extract data from websites with support for login authentication, dynamic content loading, "Load More" buttons, auto-scrolling, and a Chrome extension-style visual selector interface.
 
 ## 🎯 Perfect For
 
-- Exhibition and trade fair websites (1000+ exhibitors)
+- Lists of companies participating in fair / conferences
 - Conference participant directories
 - Business catalogs and directories
 - Any paginated or dynamically-loaded listing websites
