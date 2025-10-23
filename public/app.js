@@ -225,6 +225,20 @@ window.addEventListener('message', (event) => {
       document.getElementById('selectorWaitFor').value = selectors.container;
     }
 
+    // Handle "Load More" button selector separately
+    if (selectors.loadMoreButton) {
+      const loadMoreField = document.getElementById('loadMoreSelector');
+      if (loadMoreField) {
+        loadMoreField.value = selectors.loadMoreButton;
+        loadMoreField.style.background = '#f0fdf4';
+        setTimeout(() => {
+          loadMoreField.style.background = '';
+        }, 2000);
+        // Also enable the checkbox
+        document.getElementById('loadMoreEnabled').checked = true;
+      }
+    }
+
     showNotification('✅ Selectors applied! Ready to scrape.', 'success');
 
     // Close selector window if still open
@@ -330,6 +344,14 @@ function getFormConfig() {
       waitAfterScroll: parseInt(document.getElementById('waitAfterScroll').value),
     },
 
+    loadMoreButton: {
+      enabled: document.getElementById('loadMoreEnabled').checked,
+      selector: document.getElementById('loadMoreSelector').value || null,
+      maxClicks: parseInt(document.getElementById('loadMoreMaxClicks').value),
+      waitAfterClick: parseInt(document.getElementById('loadMoreWaitAfterClick').value),
+      scrollToButton: document.getElementById('loadMoreScrollToButton').checked,
+    },
+
     selectors: {
       waitFor: document.getElementById('selectorWaitFor').value || null,
       container: document.getElementById('selectorContainer').value,
@@ -398,6 +420,15 @@ function setFormConfig(config) {
     document.getElementById('scrollDelay').value = config.scrolling.delay || 300;
     document.getElementById('maxScrolls').value = config.scrolling.maxScrolls || 300;
     document.getElementById('waitAfterScroll').value = config.scrolling.waitAfterScroll || 3000;
+  }
+
+  // Load More Button
+  if (config.loadMoreButton) {
+    document.getElementById('loadMoreEnabled').checked = config.loadMoreButton.enabled !== false;
+    document.getElementById('loadMoreSelector').value = config.loadMoreButton.selector || '';
+    document.getElementById('loadMoreMaxClicks').value = config.loadMoreButton.maxClicks || 50;
+    document.getElementById('loadMoreWaitAfterClick').value = config.loadMoreButton.waitAfterClick || 2000;
+    document.getElementById('loadMoreScrollToButton').checked = config.loadMoreButton.scrollToButton !== false;
   }
 
   // Selectors

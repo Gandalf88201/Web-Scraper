@@ -47,6 +47,16 @@ module.exports = {
     waitAfterScroll: 3000, // Wait 3 seconds after scrolling for content to load
   },
 
+  // "See more" / "Load more" button settings
+  // Many fair websites use a button to load additional exhibitors
+  loadMoreButton: {
+    enabled: true, // Enable for Smart City Expo
+    selector: 'button.load-more', // UPDATE THIS - common: 'button.load-more', '.see-more', '[data-action="load-more"]'
+    maxClicks: 50, // Maximum number of times to click (safety limit)
+    waitAfterClick: 2000, // Wait 2 seconds after each click for content to load
+    scrollToButton: true, // Scroll to button before clicking
+  },
+
   // Delay between button clicks (milliseconds)
   clickDelay: 500,
 

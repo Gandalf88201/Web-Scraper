@@ -145,6 +145,49 @@
           </div>
         </section>
 
+        <!-- Load More Button Settings -->
+        <section class="form-section">
+          <h3>🔄 "Load More" / "See More" Button</h3>
+          <p class="section-description">
+            Enable this if the website uses a button to load additional exhibitors.
+          </p>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="loadMoreEnabled" checked>
+              <span>Enable "Load More" Button Clicking</span>
+            </label>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="loadMoreSelector">Button Selector</label>
+              <input type="text" id="loadMoreSelector"
+                     placeholder="button.load-more">
+              <small>CSS selector for the "Load more" or "See more" button</small>
+            </div>
+
+            <div class="form-group">
+              <label for="loadMoreMaxClicks">Max Clicks</label>
+              <input type="number" id="loadMoreMaxClicks" value="50" min="1" step="1">
+              <small>Maximum times to click</small>
+            </div>
+
+            <div class="form-group">
+              <label for="loadMoreWaitAfterClick">Wait After Click (ms)</label>
+              <input type="number" id="loadMoreWaitAfterClick" value="2000" min="500" step="500">
+              <small>Wait time for content to load</small>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="loadMoreScrollToButton" checked>
+                <span>Scroll to button before clicking</span>
+              </label>
+            </div>
+          </div>
+        </section>
+
         <!-- CSS Selectors -->
         <section class="form-section">
           <div class="section-header">

@@ -31,6 +31,16 @@ module.exports = {
     waitAfterScroll: 2000, // Wait after scrolling complete (for lazy loading)
   },
 
+  // "See more" / "Load more" button settings
+  // Enable this if the website uses a button to load more participants
+  loadMoreButton: {
+    enabled: false, // Set to true to enable
+    selector: null, // e.g., 'button.load-more', '.see-more-btn', '[data-action="load-more"]'
+    maxClicks: 50, // Maximum number of times to click (safety limit)
+    waitAfterClick: 2000, // Wait after each click for content to load (milliseconds)
+    scrollToButton: true, // Scroll to button before clicking
+  },
+
   // Delay between button clicks (milliseconds)
   clickDelay: 500,
 

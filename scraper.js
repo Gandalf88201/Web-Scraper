@@ -154,6 +154,85 @@ class FairScraper {
   }
 
   /**
+   * Click "Load more" or "See more" button repeatedly to load all content
+   */
+  async clickLoadMoreButton() {
+    if (!this.config.loadMoreButton || !this.config.loadMoreButton.enabled) {
+      return;
+    }
+
+    const { selector, maxClicks, waitAfterClick, scrollToButton } = this.config.loadMoreButton;
+
+    if (!selector) {
+      console.log('ℹ️  Load more button selector not configured, skipping...');
+      return;
+    }
+
+    console.log('🔄 Looking for "Load more" button...');
+    console.log(`   Selector: ${selector}`);
+    console.log(`   Max clicks: ${maxClicks}`);
+
+    let clickCount = 0;
+
+    while (clickCount < maxClicks) {
+      try {
+        // Check if button exists and is visible
+        const button = await this.page.$(selector);
+
+        if (!button) {
+          console.log('✅ No more "Load more" button found - all content loaded!');
+          break;
+        }
+
+        // Check if button is visible
+        const isVisible = await button.evaluate(el => {
+          const style = window.getComputedStyle(el);
+          return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+        });
+
+        if (!isVisible) {
+          console.log('✅ "Load more" button no longer visible - all content loaded!');
+          break;
+        }
+
+        // Scroll to button if enabled
+        if (scrollToButton) {
+          await button.evaluate(el => {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          });
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
+        // Click the button
+        clickCount++;
+        console.log(`🔘 Clicking "Load more" button (${clickCount}/${maxClicks})...`);
+
+        await button.click();
+
+        // Wait for new content to load
+        console.log(`   ⏳ Waiting ${waitAfterClick}ms for new content to load...`);
+        await new Promise(resolve => setTimeout(resolve, waitAfterClick));
+
+        // Optional: Scroll down a bit to trigger any lazy loading
+        await this.page.evaluate(() => {
+          window.scrollBy(0, 500);
+        });
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+      } catch (error) {
+        console.log(`ℹ️  Could not click "Load more" button: ${error.message}`);
+        break;
+      }
+    }
+
+    if (clickCount === maxClicks) {
+      console.log(`⚠️  Reached maximum click limit (${maxClicks}). Some content may not be loaded.`);
+    } else {
+      console.log(`✅ Finished clicking "Load more" button (${clickCount} times)`);
+    }
+  }
+
+  /**
    * Find and click buttons to open detail pages
    */
   async clickButtons(buttonSelector) {
@@ -355,6 +434,9 @@ class FairScraper {
       if (this.config.enableAutoScroll) {
         await this.autoScroll();
       }
+
+      // Click "Load more" button to load all exhibitors
+      await this.clickLoadMoreButton();
 
       // Click buttons if selector provided
       if (this.config.selectors.buttonToClick) {
