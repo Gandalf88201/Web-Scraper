@@ -4,12 +4,16 @@ The Visual Selector Tool allows you to **visually select elements with your mous
 
 ## 🎯 What is the Visual Selector?
 
+The Visual Selector works like a **Chrome extension** - it embeds the target website directly in the application!
+
 Instead of using browser DevTools to find CSS selectors, the Visual Selector:
-1. Opens your target website in a browser
-2. Adds a visual overlay with instructions
+1. Loads your target website in an embedded viewer (handles login automatically)
+2. Shows the page with a selection panel on the side
 3. Lets you **click on elements** to select them
 4. **Automatically generates** the best CSS selector
 5. **Fills in the form** for you automatically
+
+**New**: The website now loads directly inside the application window - no separate browser needed!
 
 ## 🚀 How to Use
 

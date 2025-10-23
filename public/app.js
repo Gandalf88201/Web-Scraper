@@ -85,6 +85,9 @@ socket.on('selector-error', (data) => {
   showNotification(`Visual selector error: ${data.message}`, 'error');
 });
 
+// Store selector window reference
+let selectorWindow = null;
+
 // Start visual selector
 async function startVisualSelector() {
   const targetUrl = document.getElementById('targetUrl').value;
@@ -119,7 +122,7 @@ async function startVisualSelector() {
   }
 
   try {
-    showNotification('Starting visual selector tool...', 'info');
+    showNotification('Loading page content...', 'info');
 
     const response = await fetch('/api/selector/start', {
       method: 'POST',
@@ -133,12 +136,65 @@ async function startVisualSelector() {
       throw new Error(result.error);
     }
 
-    showNotification('Visual selector tool started! A new browser window will open. Click on elements to select them.', 'success');
+    // Wait for selector-ready event
+    socket.once('selector-ready', (data) => {
+      if (data.sessionId === result.sessionId) {
+        // Open selector window
+        const selectorUrl = `/embedded-selector.html?session=${data.sessionId}`;
+        selectorWindow = window.open(selectorUrl, 'Visual Selector', 'width=1400,height=900');
+
+        if (!selectorWindow) {
+          showNotification('Please allow pop-ups for this site', 'warning');
+        } else {
+          showNotification('Visual selector opened! Click on elements to select them.', 'success');
+        }
+      }
+    });
+
+    socket.once('selector-error', (data) => {
+      if (data.sessionId === result.sessionId) {
+        showNotification(`Error loading page: ${data.message}`, 'error');
+      }
+    });
 
   } catch (error) {
     showNotification(`Failed to start visual selector: ${error.message}`, 'error');
   }
 }
+
+// Listen for selector completion from popup window
+window.addEventListener('message', (event) => {
+  if (event.data.type === 'SELECTORS_COMPLETE') {
+    const selectors = event.data.selectors;
+
+    // Update form fields
+    Object.keys(selectors).forEach(key => {
+      if (selectors[key]) {
+        const fieldId = `selector${key.charAt(0).toUpperCase() + key.slice(1)}`;
+        const field = document.getElementById(fieldId);
+        if (field) {
+          field.value = selectors[key];
+          field.style.background = '#f0fdf4';
+          setTimeout(() => {
+            field.style.background = '';
+          }, 2000);
+        }
+      }
+    });
+
+    // Set waitFor to container if not set
+    if (selectors.container && !document.getElementById('selectorWaitFor').value) {
+      document.getElementById('selectorWaitFor').value = selectors.container;
+    }
+
+    showNotification('✅ Selectors applied! Ready to scrape.', 'success');
+
+    // Close selector window if still open
+    if (selectorWindow && !selectorWindow.closed) {
+      selectorWindow.close();
+    }
+  }
+});
 
 // Start scraper
 async function startScraper() {

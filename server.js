@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const FairScraper = require('./scraper');
 const VisualSelectorTool = require('./selector-tool');
+const EmbeddedSelector = require('./embedded-selector');
 
 const app = express();
 const server = http.createServer(app);
@@ -16,8 +17,8 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Store active scraper instances
@@ -28,6 +29,9 @@ let scraperStatus = {
   message: 'Ready',
   participants: 0,
 };
+
+// Store selector sessions
+const selectorSessions = new Map();
 
 // Routes
 app.get('/', (req, res) => {
@@ -89,29 +93,57 @@ app.delete('/api/config/:name', async (req, res) => {
   }
 });
 
-// API: Start visual selector tool
+// API: Start embedded visual selector
 app.post('/api/selector/start', async (req, res) => {
   try {
     const { url, loginConfig } = req.body;
 
-    const tool = new VisualSelectorTool({
-      onSelectorSelected: (elementType, selector) => {
-        // Send update to connected clients
-        io.emit('selector-update', { elementType, selector });
-      },
-      onComplete: (selectors) => {
-        // Send complete selectors to connected clients
-        io.emit('selectors-complete', { selectors });
-      },
-    });
+    // Generate session ID
+    const sessionId = Date.now().toString(36) + Math.random().toString(36).substr(2);
 
-    // Start the tool (runs in background)
-    tool.start(url, loginConfig).catch((error) => {
-      console.error('Visual selector error:', error);
-      io.emit('selector-error', { message: error.message });
-    });
+    res.json({ success: true, message: 'Loading page...', sessionId });
 
-    res.json({ success: true, message: 'Visual selector tool started' });
+    // Load page in background
+    const embeddedSelector = new EmbeddedSelector();
+
+    embeddedSelector.getAuthenticatedPage(url, loginConfig)
+      .then((pageData) => {
+        // Store in session
+        selectorSessions.set(sessionId, {
+          html: pageData.html,
+          url: pageData.url,
+          timestamp: Date.now(),
+        });
+
+        // Notify client that page is ready
+        io.emit('selector-ready', { sessionId });
+
+        console.log(`✅ Selector session ${sessionId} ready`);
+      })
+      .catch((error) => {
+        console.error('Embedded selector error:', error);
+        io.emit('selector-error', { message: error.message, sessionId });
+      });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API: Get selector page content
+app.get('/api/selector/content/:sessionId', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const session = selectorSessions.get(sessionId);
+
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    res.json({
+      html: session.html,
+      url: session.url,
+    });
 
   } catch (error) {
     res.status(500).json({ error: error.message });
