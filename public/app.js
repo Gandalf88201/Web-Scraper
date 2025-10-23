@@ -45,6 +45,101 @@ socket.on('error', (error) => {
   showNotification(`Error: ${error.message}`, 'error');
 });
 
+// Visual selector events
+socket.on('selector-update', (data) => {
+  // Update the corresponding field when a selector is selected
+  const fieldId = `selector${data.elementType.charAt(0).toUpperCase() + data.elementType.slice(1)}`;
+  const field = document.getElementById(fieldId);
+  if (field) {
+    field.value = data.selector;
+    field.style.background = '#f0fdf4';
+    setTimeout(() => {
+      field.style.background = '';
+    }, 1000);
+  }
+  showNotification(`Selected ${data.elementType}: ${data.selector}`, 'success');
+});
+
+socket.on('selectors-complete', (data) => {
+  // Update all selector fields
+  const selectors = data.selectors;
+  Object.keys(selectors).forEach(key => {
+    if (selectors[key]) {
+      const fieldId = `selector${key.charAt(0).toUpperCase() + key.slice(1)}`;
+      const field = document.getElementById(fieldId);
+      if (field) {
+        field.value = selectors[key];
+      }
+    }
+  });
+
+  // Also set waitFor to container if not set
+  if (selectors.container && !document.getElementById('selectorWaitFor').value) {
+    document.getElementById('selectorWaitFor').value = selectors.container;
+  }
+
+  showNotification('Visual selector completed! Selectors have been filled in.', 'success');
+});
+
+socket.on('selector-error', (data) => {
+  showNotification(`Visual selector error: ${data.message}`, 'error');
+});
+
+// Start visual selector
+async function startVisualSelector() {
+  const targetUrl = document.getElementById('targetUrl').value;
+
+  if (!targetUrl) {
+    showNotification('Please enter a Target URL first', 'warning');
+    return;
+  }
+
+  // Prepare login config if needed
+  let loginConfig = null;
+  if (loginRequiredCheckbox.checked) {
+    const loginUrl = document.getElementById('loginUrl').value;
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    if (!loginUrl || !username || !password) {
+      showNotification('Please fill in login credentials first', 'warning');
+      return;
+    }
+
+    loginConfig = {
+      required: true,
+      loginUrl: loginUrl,
+      username: username,
+      password: password,
+      usernameSelector: document.getElementById('usernameSelector').value,
+      passwordSelector: document.getElementById('passwordSelector').value,
+      submitSelector: document.getElementById('submitSelector').value,
+      waitAfterLogin: parseInt(document.getElementById('waitAfterLogin').value),
+    };
+  }
+
+  try {
+    showNotification('Starting visual selector tool...', 'info');
+
+    const response = await fetch('/api/selector/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: targetUrl, loginConfig }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error);
+    }
+
+    showNotification('Visual selector tool started! A new browser window will open. Click on elements to select them.', 'success');
+
+  } catch (error) {
+    showNotification(`Failed to start visual selector: ${error.message}`, 'error');
+  }
+}
+
 // Start scraper
 async function startScraper() {
   const config = getFormConfig();

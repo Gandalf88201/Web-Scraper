@@ -6,6 +6,7 @@ const fs = require('fs').promises;
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const FairScraper = require('./scraper');
+const VisualSelectorTool = require('./selector-tool');
 
 const app = express();
 const server = http.createServer(app);
@@ -83,6 +84,35 @@ app.delete('/api/config/:name', async (req, res) => {
     const configPath = path.join(__dirname, 'saved-configs', `${req.params.name}.json`);
     await fs.unlink(configPath);
     res.json({ success: true, message: 'Configuration deleted' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API: Start visual selector tool
+app.post('/api/selector/start', async (req, res) => {
+  try {
+    const { url, loginConfig } = req.body;
+
+    const tool = new VisualSelectorTool({
+      onSelectorSelected: (elementType, selector) => {
+        // Send update to connected clients
+        io.emit('selector-update', { elementType, selector });
+      },
+      onComplete: (selectors) => {
+        // Send complete selectors to connected clients
+        io.emit('selectors-complete', { selectors });
+      },
+    });
+
+    // Start the tool (runs in background)
+    tool.start(url, loginConfig).catch((error) => {
+      console.error('Visual selector error:', error);
+      io.emit('selector-error', { message: error.message });
+    });
+
+    res.json({ success: true, message: 'Visual selector tool started' });
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

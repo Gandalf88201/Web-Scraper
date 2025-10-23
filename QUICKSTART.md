@@ -18,6 +18,41 @@ Then open: **http://localhost:3000**
 
 ## Configuration Steps for Smart City Expo
 
+### ⚡ Quick Method: Visual Selector (Recommended)
+
+**Easiest way - No DevTools needed!**
+
+1. In the Web UI, enter:
+   - Target URL: `https://ecatalogue.firabarcelona.com/smartcityexpo2025/home?filter=ONLY_EXHIBITORS&lang=en_GB`
+   - Login URL, username, password
+   - Login field selectors (see Step 1 below for finding these)
+
+2. Click **"🖱️ Visual Selector"** button
+
+3. A browser window opens with a panel on the right
+
+4. Click "Select" for each element, then click on the element on the page:
+   - Container (the exhibitor card)
+   - Company Name
+   - Logo
+   - Website Link
+   - Booth Position
+   - Category
+
+5. Click **"Done & Use Selectors"**
+
+6. All selectors are automatically filled in! ✨
+
+7. Skip to Step 4 below
+
+See [VISUAL_SELECTOR_GUIDE.md](VISUAL_SELECTOR_GUIDE.md) for detailed Visual Selector instructions.
+
+---
+
+### 🔧 Manual Method: DevTools (Alternative)
+
+If you prefer to find selectors manually:
+
 ### Step 1: Find Login Selectors
 
 1. Open https://ecatalogue.firabarcelona.com/smartcityexpo2025/login in Chrome

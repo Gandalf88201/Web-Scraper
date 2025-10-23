@@ -76,13 +76,19 @@ header h1 {
 .section-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 1.5rem;
+  gap: 1rem;
 }
 
 .section-header h2,
 .section-header h3 {
   margin: 0;
+}
+
+.visual-selector-btn {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 h2 {

@@ -18,6 +18,7 @@ See [UI_GUIDE.md](UI_GUIDE.md) for complete Web UI documentation.
 ## Features
 
 - **🖥️ Web UI**: User-friendly interface for configuration (no code editing!)
+- **🖱️ Visual Selector**: **NEW!** Click on elements with your mouse to auto-detect CSS selectors (no DevTools needed!)
 - **🔐 Login support**: Handle password-protected fair websites
 - **📜 Auto-scrolling**: Automatically scrolls through pages to load all dynamically-loaded content
 - **🔘 Button clicking**: Can automatically click buttons to reveal additional information
@@ -31,7 +32,7 @@ See [UI_GUIDE.md](UI_GUIDE.md) for complete Web UI documentation.
 
 ## Quick Start
 
-### Option 1: Web UI (Recommended)
+### Option 1: Web UI with Visual Selector (Recommended - Easiest!)
 
 ```bash
 # 1. Install dependencies
@@ -41,11 +42,14 @@ npm install
 npm run ui
 
 # 3. Open browser to http://localhost:3000
-# 4. Configure settings in the web form
-# 5. Click "Start Scraping"
+# 4. Enter target URL and login info (if needed)
+# 5. Click "🖱️ Visual Selector" button
+# 6. Click on elements with your mouse to select them
+# 7. Click "Done & Use Selectors"
+# 8. Click "🚀 Start Scraping"
 ```
 
-See [UI_GUIDE.md](UI_GUIDE.md) for detailed instructions.
+See [VISUAL_SELECTOR_GUIDE.md](VISUAL_SELECTOR_GUIDE.md) for Visual Selector guide, or [UI_GUIDE.md](UI_GUIDE.md) for detailed Web UI instructions.
 
 ### Option 2: Command Line
 

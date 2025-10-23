@@ -147,11 +147,18 @@
 
         <!-- CSS Selectors -->
         <section class="form-section">
-          <h3>🎯 CSS Selectors</h3>
-          <p class="section-description">
-            Use browser DevTools to find the correct selectors.
-            <a href="#" onclick="showSelectorHelp(); return false;">Need help?</a>
-          </p>
+          <div class="section-header">
+            <div>
+              <h3>🎯 CSS Selectors</h3>
+              <p class="section-description">
+                Use browser DevTools to find the correct selectors, or use the Visual Selector tool.
+                <a href="#" onclick="showSelectorHelp(); return false;">Need help?</a>
+              </p>
+            </div>
+            <button type="button" onclick="startVisualSelector()" class="btn btn-primary visual-selector-btn">
+              🖱️ Visual Selector
+            </button>
+          </div>
 
           <div class="form-grid">
             <div class="form-group full-width">
