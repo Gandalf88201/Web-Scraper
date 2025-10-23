@@ -97,7 +97,7 @@ class FairScraper {
       });
 
       // Additional wait for login to complete
-      await this.page.waitForTimeout(this.config.login.waitAfterLogin || 2000);
+      await new Promise(resolve => setTimeout(resolve, this.config.login.waitAfterLogin || 2000));
 
       console.log('✅ Login successful');
 
@@ -150,7 +150,7 @@ class FairScraper {
     console.log('✅ Scrolling complete');
 
     // Wait for any lazy-loaded content
-    await this.page.waitForTimeout(this.config.scrolling.waitAfterScroll);
+    await new Promise(resolve => setTimeout(resolve, this.config.scrolling.waitAfterScroll));
   }
 
   /**
@@ -169,11 +169,11 @@ class FairScraper {
 
           // Scroll element into view
           await buttons[i].evaluate(el => el.scrollIntoView({ behavior: 'smooth', block: 'center' }));
-          await this.page.waitForTimeout(this.config.clickDelay);
+          await new Promise(resolve => setTimeout(resolve, this.config.clickDelay));
 
           // Click the button
           await buttons[i].click();
-          await this.page.waitForTimeout(this.config.clickDelay);
+          await new Promise(resolve => setTimeout(resolve, this.config.clickDelay));
 
         } catch (error) {
           console.warn(`⚠️  Failed to click button ${i + 1}: ${error.message}`);

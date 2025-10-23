@@ -53,7 +53,7 @@ class VisualSelectorTool {
     });
 
     // Wait a bit for page to fully load
-    await this.page.waitForTimeout(2000);
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Inject the selector UI
     await this.injectSelectorUI();
@@ -76,7 +76,7 @@ class VisualSelectorTool {
       timeout: 90000,
     });
 
-    await this.page.waitForTimeout(1000);
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     if (loginConfig.usernameSelector && loginConfig.username) {
       await this.page.waitForSelector(loginConfig.usernameSelector);
@@ -90,7 +90,7 @@ class VisualSelectorTool {
     if (loginConfig.submitSelector) {
       await this.page.click(loginConfig.submitSelector);
       await this.page.waitForNavigation({ waitUntil: 'networkidle2' }).catch(() => {});
-      await this.page.waitForTimeout(loginConfig.waitAfterLogin || 2000);
+      await new Promise(resolve => setTimeout(resolve, loginConfig.waitAfterLogin || 2000));
     }
 
     console.log('✅ Login complete');

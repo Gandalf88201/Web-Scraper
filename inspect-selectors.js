@@ -40,14 +40,14 @@ async function inspectSelectors() {
     console.log('✅ Page loaded');
     console.log('');
     console.log('⏳ Waiting 5 seconds for dynamic content to load...');
-    await page.waitForTimeout(5000);
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
     // Scroll down a bit to load more content
     console.log('📜 Scrolling to load content...');
     await page.evaluate(() => {
       window.scrollBy(0, 1000);
     });
-    await page.waitForTimeout(2000);
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     console.log('');
     console.log('🔎 Analyzing page structure...');
