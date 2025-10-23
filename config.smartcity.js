@@ -10,6 +10,20 @@ module.exports = {
   // Target website URL
   targetUrl: 'https://ecatalogue.firabarcelona.com/smartcityexpo2025/home?filter=ONLY_EXHIBITORS&lang=en_GB',
 
+  // Login configuration
+  login: {
+    required: true, // Set to false if no login needed
+    loginUrl: 'https://ecatalogue.firabarcelona.com/smartcityexpo2025/login', // UPDATE THIS
+    username: '', // Fill in your username/email
+    password: '', // Fill in your password
+    email: '', // If email is separate from username
+    usernameSelector: '#username', // UPDATE: CSS selector for username field
+    passwordSelector: '#password', // UPDATE: CSS selector for password field
+    emailSelector: null, // UPDATE if email field exists separately
+    submitSelector: 'button[type="submit"]', // UPDATE: CSS selector for login button
+    waitAfterLogin: 3000, // Wait 3 seconds after login
+  },
+
   // Browser settings
   headless: false, // Keep false initially to see what's happening
   timeout: 90000, // 90 seconds (fair websites can be slow)

@@ -9,6 +9,9 @@ data*.json
 *.xlsx
 *.csv
 
+# Saved configurations (may contain passwords)
+saved-configs/
+
 # Logs
 logs/
 *.log

@@ -1,17 +1,64 @@
 # Fair Participants Web Scraper
 
-A powerful Node.js web scraper designed to extract participant data from fair/exhibition websites with support for dynamic content, auto-scrolling, and automated button clicking.
+A powerful Node.js web scraper designed to extract participant data from fair/exhibition websites with support for dynamic content, auto-scrolling, login authentication, and a user-friendly web interface.
+
+## ✨ Web UI - Easy Mode!
+
+**NEW**: Use the web interface for easy configuration - no code editing required!
+
+```bash
+npm install
+npm run ui
+```
+
+Then open http://localhost:3000 in your browser.
+
+See [UI_GUIDE.md](UI_GUIDE.md) for complete Web UI documentation.
 
 ## Features
 
-- **Auto-scrolling**: Automatically scrolls through pages to load all dynamically-loaded content
-- **Button clicking**: Can automatically click buttons to reveal additional information
-- **Data extraction**: Extracts logos, names, website links, positions, and categories
-- **Multiple exports**: Outputs data in both JSON and Excel formats
-- **Category grouping**: Organizes participants by category
-- **Headless mode**: Can run with or without visible browser window
-- **Error handling**: Robust error handling and logging
-- **Configurable**: Easy to customize via config file
+- **🖥️ Web UI**: User-friendly interface for configuration (no code editing!)
+- **🔐 Login support**: Handle password-protected fair websites
+- **📜 Auto-scrolling**: Automatically scrolls through pages to load all dynamically-loaded content
+- **🔘 Button clicking**: Can automatically click buttons to reveal additional information
+- **📊 Data extraction**: Extracts logos, names, website links, positions, and categories
+- **💾 Multiple exports**: Outputs data in both JSON and Excel formats
+- **📁 Category grouping**: Organizes participants by category
+- **⚡ Real-time progress**: Watch scraping progress live in the web UI
+- **💿 Save configurations**: Save and load different website configurations
+- **👀 Headless mode**: Can run with or without visible browser window
+- **🛡️ Error handling**: Robust error handling and logging
+
+## Quick Start
+
+### Option 1: Web UI (Recommended)
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Start web interface
+npm run ui
+
+# 3. Open browser to http://localhost:3000
+# 4. Configure settings in the web form
+# 5. Click "Start Scraping"
+```
+
+See [UI_GUIDE.md](UI_GUIDE.md) for detailed instructions.
+
+### Option 2: Command Line
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Edit config.js with your settings
+# 3. Run scraper
+npm start
+```
+
+See below for CLI configuration details.
 
 ## Extracted Data
 

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fair Scraper - Web UI</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🏙️ Fair Participants Scraper</h1>
+      <p class="subtitle">Configure and run web scraping with ease</p>
+    </header>
+
+    <div class="main-content">
+      <!-- Configuration Management -->
+      <section class="config-management">
+        <div class="section-header">
+          <h2>Configuration</h2>
+          <div class="config-actions">
+            <select id="savedConfigs" class="config-select">
+              <option value="">-- Load Saved Config --</option>
+            </select>
+            <button onclick="loadConfig()" class="btn btn-secondary">Load</button>
+            <button onclick="saveConfig()" class="btn btn-secondary">Save As...</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Form -->
+      <form id="scraperForm">
+        <!-- Basic Settings -->
+        <section class="form-section">
+          <h3>🌐 Basic Settings</h3>
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="targetUrl">Target URL *</label>
+              <input type="url" id="targetUrl" required
+                     placeholder="https://ecatalogue.firabarcelona.com/smartcityexpo2025/home">
+            </div>
+
+            <div class="form-group">
+              <label for="headless">Browser Mode</label>
+              <select id="headless">
+                <option value="false">Visible (Recommended for testing)</option>
+                <option value="true">Headless (Faster)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="timeout">Timeout (ms)</label>
+              <input type="number" id="timeout" value="90000" min="10000" step="1000">
+            </div>
+          </div>
+        </section>
+
+        <!-- Login Settings -->
+        <section class="form-section">
+          <h3>🔐 Login Settings</h3>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="loginRequired">
+              <span>Login Required</span>
+            </label>
+          </div>
+
+          <div id="loginFields" style="display: none;">
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label for="loginUrl">Login Page URL *</label>
+                <input type="url" id="loginUrl"
+                       placeholder="https://example.com/login">
+              </div>
+
+              <div class="form-group">
+                <label for="username">Username/Email</label>
+                <input type="text" id="username" placeholder="your-username">
+              </div>
+
+              <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="your-password">
+              </div>
+
+              <div class="form-group">
+                <label for="usernameSelector">Username Field Selector *</label>
+                <input type="text" id="usernameSelector"
+                       placeholder="#username" value="#username">
+              </div>
+
+              <div class="form-group">
+                <label for="passwordSelector">Password Field Selector *</label>
+                <input type="text" id="passwordSelector"
+                       placeholder="#password" value="#password">
+              </div>
+
+              <div class="form-group">
+                <label for="submitSelector">Login Button Selector *</label>
+                <input type="text" id="submitSelector"
+                       placeholder="button[type='submit']" value="button[type='submit']">
+              </div>
+
+              <div class="form-group">
+                <label for="waitAfterLogin">Wait After Login (ms)</label>
+                <input type="number" id="waitAfterLogin" value="3000" min="0" step="500">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Scrolling Settings -->
+        <section class="form-section">
+          <h3>📜 Auto-Scroll Settings</h3>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="enableAutoScroll" checked>
+              <span>Enable Auto-Scrolling</span>
+            </label>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="scrollDistance">Scroll Distance (px)</label>
+              <input type="number" id="scrollDistance" value="400" min="50" step="50">
+            </div>
+
+            <div class="form-group">
+              <label for="scrollDelay">Scroll Delay (ms)</label>
+              <input type="number" id="scrollDelay" value="300" min="100" step="50">
+            </div>
+
+            <div class="form-group">
+              <label for="maxScrolls">Max Scrolls</label>
+              <input type="number" id="maxScrolls" value="300" min="10" step="10">
+              <small>Higher = More items loaded</small>
+            </div>
+
+            <div class="form-group">
+              <label for="waitAfterScroll">Wait After Scroll (ms)</label>
+              <input type="number" id="waitAfterScroll" value="3000" min="1000" step="500">
+            </div>
+          </div>
+        </section>
+
+        <!-- CSS Selectors -->
+        <section class="form-section">
+          <h3>🎯 CSS Selectors</h3>
+          <p class="section-description">
+            Use browser DevTools to find the correct selectors.
+            <a href="#" onclick="showSelectorHelp(); return false;">Need help?</a>
+          </p>
+
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="selectorWaitFor">Wait For Element</label>
+              <input type="text" id="selectorWaitFor"
+                     placeholder=".exhibitor-card">
+              <small>Element to wait for before starting extraction</small>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="selectorContainer">Container Selector *</label>
+              <input type="text" id="selectorContainer" required
+                     placeholder=".exhibitor-card">
+              <small>Main wrapper element for each participant</small>
+            </div>
+
+            <div class="form-group">
+              <label for="selectorLogo">Logo Selector</label>
+              <input type="text" id="selectorLogo"
+                     placeholder="img.company-logo">
+            </div>
+
+            <div class="form-group">
+              <label for="selectorName">Name Selector *</label>
+              <input type="text" id="selectorName" required
+                     placeholder=".company-name">
+            </div>
+
+            <div class="form-group">
+              <label for="selectorLink">Website Link Selector</label>
+              <input type="text" id="selectorLink"
+                     placeholder="a.website-link">
+            </div>
+
+            <div class="form-group">
+              <label for="selectorPosition">Position/Booth Selector</label>
+              <input type="text" id="selectorPosition"
+                     placeholder=".stand-number">
+            </div>
+
+            <div class="form-group full-width">
+              <label for="selectorCategory">Category Selector</label>
+              <input type="text" id="selectorCategory"
+                     placeholder=".exhibitor-category">
+            </div>
+
+            <div class="form-group full-width">
+              <label for="selectorButtonToClick">Button to Click (Optional)</label>
+              <input type="text" id="selectorButtonToClick"
+                     placeholder=".expand-button">
+              <small>Button to click to reveal more details</small>
+            </div>
+          </div>
+        </section>
+
+        <!-- Export Settings -->
+        <section class="form-section">
+          <h3>💾 Export Settings</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="exportJSON" checked>
+                <span>Export to JSON</span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="exportExcel" checked>
+                <span>Export to Excel</span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- Action Buttons -->
+        <section class="form-actions">
+          <button type="submit" class="btn btn-primary" id="startBtn">
+            🚀 Start Scraping
+          </button>
+          <button type="button" class="btn btn-danger" id="stopBtn" onclick="stopScraper()" disabled>
+            ⏹️ Stop
+          </button>
+        </section>
+      </form>
+
+      <!-- Progress Section -->
+      <section class="progress-section" id="progressSection" style="display: none;">
+        <h3>Progress</h3>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <div class="progress-stats">
+          <div class="stat">
+            <span class="stat-label">Status:</span>
+            <span class="stat-value" id="statusMessage">Ready</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Progress:</span>
+            <span class="stat-value" id="progressPercent">0%</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Participants:</span>
+            <span class="stat-value" id="participantCount">0</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Output Files Section -->
+      <section class="output-section">
+        <div class="section-header">
+          <h3>📁 Output Files</h3>
+          <button onclick="refreshOutputs()" class="btn btn-secondary btn-sm">Refresh</button>
+        </div>
+        <div id="outputFiles" class="file-list">
+          <p class="empty-state">No output files yet. Start a scraping job to generate files.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Modal for saving config -->
+  <div id="saveModal" class="modal">
+    <div class="modal-content">
+      <h3>Save Configuration</h3>
+      <div class="form-group">
+        <label for="configName">Configuration Name</label>
+        <input type="text" id="configName" placeholder="my-config">
+      </div>
+      <div class="modal-actions">
+        <button onclick="confirmSave()" class="btn btn-primary">Save</button>
+        <button onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Selector Help Modal -->
+  <div id="helpModal" class="modal">
+    <div class="modal-content modal-large">
+      <h3>How to Find CSS Selectors</h3>
+      <div class="help-content">
+        <ol>
+          <li>Open the target website in Chrome or Firefox</li>
+          <li>Right-click on an exhibitor card and select "Inspect"</li>
+          <li>The DevTools will open showing the HTML</li>
+          <li>Find the element's class or ID attribute</li>
+          <li>Use it as a selector (e.g., <code>.exhibitor-card</code> for class, <code>#main</code> for ID)</li>
+        </ol>
+        <h4>Examples:</h4>
+        <ul>
+          <li><strong>Class:</strong> <code>&lt;div class="exhibitor-card"&gt;</code> → <code>.exhibitor-card</code></li>
+          <li><strong>ID:</strong> <code>&lt;div id="content"&gt;</code> → <code>#content</code></li>
+          <li><strong>Tag + Class:</strong> <code>&lt;img class="logo"&gt;</code> → <code>img.logo</code></li>
+          <li><strong>Nested:</strong> <code>.card .title</code> finds title inside card</li>
+        </ul>
+      </div>
+      <div class="modal-actions">
+        <button onclick="closeHelpModal()" class="btn btn-primary">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

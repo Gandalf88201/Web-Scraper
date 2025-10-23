@@ -40,6 +40,74 @@ class FairScraper {
   }
 
   /**
+   * Login to the website if credentials are provided
+   */
+  async login() {
+    if (!this.config.login || !this.config.login.required) {
+      console.log('ℹ️  No login required');
+      return;
+    }
+
+    console.log('🔐 Logging in...');
+
+    try {
+      // Navigate to login page
+      await this.page.goto(this.config.login.loginUrl, {
+        waitUntil: this.config.waitUntil,
+        timeout: this.config.timeout,
+      });
+
+      // Wait for login form to load
+      if (this.config.login.usernameSelector) {
+        await this.page.waitForSelector(this.config.login.usernameSelector, {
+          timeout: this.config.timeout,
+        });
+      }
+
+      // Fill in username
+      if (this.config.login.usernameSelector && this.config.login.username) {
+        await this.page.type(this.config.login.usernameSelector, this.config.login.username);
+        console.log('   ✓ Username entered');
+      }
+
+      // Fill in password
+      if (this.config.login.passwordSelector && this.config.login.password) {
+        await this.page.type(this.config.login.passwordSelector, this.config.login.password);
+        console.log('   ✓ Password entered');
+      }
+
+      // Fill in any additional fields (e.g., email)
+      if (this.config.login.emailSelector && this.config.login.email) {
+        await this.page.type(this.config.login.emailSelector, this.config.login.email);
+        console.log('   ✓ Email entered');
+      }
+
+      // Click submit button
+      if (this.config.login.submitSelector) {
+        await this.page.click(this.config.login.submitSelector);
+        console.log('   ✓ Login button clicked');
+      }
+
+      // Wait for navigation after login
+      await this.page.waitForNavigation({
+        waitUntil: this.config.waitUntil,
+        timeout: this.config.timeout,
+      }).catch(() => {
+        // Sometimes login doesn't navigate, just continue
+      });
+
+      // Additional wait for login to complete
+      await this.page.waitForTimeout(this.config.login.waitAfterLogin || 2000);
+
+      console.log('✅ Login successful');
+
+    } catch (error) {
+      console.error('❌ Login failed:', error.message);
+      throw new Error(`Login failed: ${error.message}`);
+    }
+  }
+
+  /**
    * Navigate to the target URL
    */
   async navigateToPage(url) {
@@ -269,6 +337,10 @@ class FairScraper {
   async scrape() {
     try {
       await this.initialize();
+
+      // Login if required
+      await this.login();
+
       await this.navigateToPage(this.config.targetUrl);
 
       // Optional: Wait for specific element
